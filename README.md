@@ -1,91 +1,59 @@
-# FFmpeg Base
+# Castvane FFmpeg
 
-FFmpeg 9.1 container images for Alpine, Raspberry Pi, CUDA and VAAPI.
-
-[![alpine](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_alpine.yaml/badge.svg)](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_alpine.yaml)
-[![alpine-rpi](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_alpine-rpi.yaml/badge.svg)](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_alpine-rpi.yaml)
-[![base:ubuntu-ffmpeg-vvapi](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_ubuntu-vaapi.yaml/badge.svg)](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_ubuntu-vaapi.yaml)
-[![ubuntu-cuda](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_ubuntu-cuda.yaml/badge.svg)](https://github.com/Castvane/ffmpeg/actions/workflows/build_base_ubuntu-cuda.yaml)
-
-FFmpeg 9.1
-
-## Config:
-
-```sh
---enable-libv4l2
---enable-libfreetype
---enable-alsa
---enable-libsrt
---enable-libx264
---enable-libx265
---enable-libvpx
---enable-libmp3lame
---enable-libopus
---enable-libvorbis
-```
-
-_Additional informations can be found in the Dockerfiles._
-
-## Patches ([contrib](contrib/)):
-
-- JSON-Stats (expands progress data per file in json format)
-- HLS Bitrate (calculates bitrate estimate for HLS master playlist)
+Build recipes for FFmpeg 9.1 container images for Alpine Linux, Raspberry Pi, NVIDIA CUDA, and VAAPI. The images run `ffmpeg` as their entrypoint and show the version when started without arguments.
 
 ## Container images
 
-All tags below use `ghcr.io/castvane/ffmpeg`.
+The publishing workflows target `ghcr.io/castvane/ffmpeg` with the following tags. Check [GitHub Actions](https://github.com/Castvane/ffmpeg/actions?query=branch%3Amain) for build and publication status.
 
-| Tag | Platforms |
+| Variant | Image tag | Target platforms |
+| --- | --- | --- |
+| [Alpine 3.23](.github/workflows/build_base_alpine.yaml) | `ffmpeg9.1-alpine3.23` | `linux/amd64`, `linux/arm64`, `linux/arm/v7` |
+| [Raspberry Pi on Alpine 3.23](.github/workflows/build_base_alpine-rpi.yaml) | `ffmpeg9.1-rpi-alpine3.23` | `linux/arm64`, `linux/arm/v7` |
+| [CUDA 12.9.1 on Ubuntu 24.04](.github/workflows/build_base_ubuntu-cuda.yaml) | `ffmpeg9.1-cuda-ubuntu24.04-cuda12.9.1` | `linux/amd64` |
+| [CUDA 13.3.0 on Ubuntu 26.04](.github/workflows/build_base_ubuntu-cuda.yaml) | `ffmpeg9.1-cuda-ubuntu26.04-cuda13.3.0` | `linux/amd64` |
+| [VAAPI on Ubuntu 26.04](.github/workflows/build_base_ubuntu-vaapi.yaml) | `ffmpeg9.1-vaapi-ubuntu26.04` | `linux/amd64` |
+
+Once the Alpine image is available to your account, check its version with:
+
+```sh
+docker run --rm ghcr.io/castvane/ffmpeg:ffmpeg9.1-alpine3.23 -version
+```
+
+The Raspberry Pi build currently passes OpenMAX options on `linux/arm/v7` that FFmpeg 9.1 no longer accepts. The multi-platform image build can fail before publishing either architecture.
+
+## Build locally
+
+Install Docker with Buildx, then build and check the default Alpine image:
+
+```sh
+git clone https://github.com/Castvane/ffmpeg.git
+cd ffmpeg
+./Build.sh default
+docker run --rm castvane/ffmpeg:ffmpeg9.1-alpine3.23 -version
+```
+
+| `Build.sh` target | Build configuration |
 | --- | --- |
-| `ffmpeg9.1-alpine3.23` | amd64, arm64, arm/v7 |
-| `ffmpeg9.1-rpi-alpine3.23` | arm64, arm/v7 |
-| `ffmpeg9.1-cuda-ubuntu24.04-cuda12.9.1` | amd64 |
-| `ffmpeg9.1-cuda-ubuntu26.04-cuda13.3.0` | amd64 |
-| `ffmpeg9.1-vaapi-ubuntu26.04` | amd64 |
+| `default` | Alpine 3.23 for `linux/amd64` |
+| `default_native` | Alpine 3.23 for the Docker builder's default platform |
+| `rpi` | Raspberry Pi on Alpine 3.21, using the builder's default platform |
+| `cuda12` | Ubuntu 24.04. Set `CUDA_VERSION=12.9.1` when invoking the script to match CI. |
+| `cuda13` | Ubuntu 26.04. Set `CUDA_VERSION=13.3.0` when invoking the script to match CI. |
+| `vaapi` | Ubuntu 26.04 for `linux/amd64` |
 
-## Build & test
+See the [build script](Build.sh) for image tags and the Dockerfile for each variant for its FFmpeg configuration. The [binary export workflow](.github/workflows/build_base_alpine_static.yaml) is manually dispatched on a self-hosted runner and is configured to export a workflow artifact.
 
-```sh
-$ git clone https://github.com/Castvane/ffmpeg.git
-$ cd ffmpeg
-$ ./Build.sh {arg}
-```
+## Patches
 
-Build targets are `default`, `default_native`, `rpi`, `cuda12`, `cuda13` and `vaapi`.
+The builds include patches for HLS playlist bandwidth estimation and JSON stream statistics. The Alpine container builds also apply the musl V4L2 ioctl patch. See the [patch documentation](contrib/README.md) for the available log prefixes and options.
 
-## Known problems:
+## Publishing
 
-The libraries are currently not compiled due to errors caused by Docker virtualisation.
+Pushes to `main` trigger the four container publishing workflows. You can also dispatch them from [GitHub Actions](https://github.com/Castvane/ffmpeg/actions). They authenticate to GHCR with the workflow's `GITHUB_TOKEN`. Pulling a private package requires authenticated access to that package.
 
-## Feature requests:
+For optional Docker Hub publishing, add the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` Actions secrets and set the `DOCKERHUB_IMAGE` Actions variable to a lowercase `namespace/repository`. The token needs write access to that repository. When the variable is set, the workflows target both registries with the same tags.
 
-Please create an issue with your use case and all the requirements.
+## Licensing
 
-## Licence
-
-LGPL-licensed with optional components licensed under GPL. Please refer to the LICENSE file for detailed information.
-
-## Publishing container images
-
-Pushes to the `main` branch publish the Alpine, Raspberry Pi, CUDA and
-VAAPI images to `ghcr.io/castvane/ffmpeg`. Each image workflow
-can also be run manually from the repository's Actions tab.
-
-For example, pull the Alpine image with:
-
-```sh
-docker pull ghcr.io/castvane/ffmpeg:ffmpeg9.1-alpine3.23
-```
-
-GitHub creates new container packages with private visibility. To allow
-anonymous pulls, change the package visibility in its GitHub settings.
-
-### Enable Docker Hub publishing later
-
-In the GitHub repository's **Settings → Secrets and variables → Actions**:
-
-1. Add the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` secrets. Use a Docker
-   Hub access token with write access to the destination repository.
-2. Set the `DOCKERHUB_IMAGE` repository variable to a lowercase
-   `namespace/repository` value for a Docker Hub repository you control.
-3. Run the image workflows again. They publish the same tags to both registries.
+See [LICENSE](LICENSE) for Castvane's MIT license. FFmpeg and its dependencies have their own license terms. These Dockerfiles use `--enable-nonfree`, which FFmpeg marks as producing an unredistributable binary. Review the build configuration before distributing images.
