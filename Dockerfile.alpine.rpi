@@ -66,7 +66,6 @@ RUN echo $uname
 
 RUN cd /dist/ffmpeg-${FFMPEG_VERSION} && \
   apkArch="$(apk --print-arch)" && if [ $apkArch != "aarch64" ]; then MMAL_SUPPORT="--enable-mmal"; fi && \
-  apkArch="$(apk --print-arch)" && if [ $apkArch != "aarch64" ]; then OMX_SUPPORT="--enable-omx --enable-omx-rpi"; fi && \
   patch -p1 < /contrib/posix-ioctl.patch && \
   patch -p1 < /contrib/ffmpeg-jsonstats.patch && \
   patch -p1 < /contrib/ffmpeg-hls.patch && \
@@ -80,7 +79,6 @@ RUN cd /dist/ffmpeg-${FFMPEG_VERSION} && \
   --enable-static \
   --enable-openssl \
   --enable-libxml2 \
-  $OMX_SUPPORT \
   $MMAL_SUPPORT \
   --enable-libv4l2 \
   --enable-v4l2_m2m \

@@ -20,7 +20,7 @@ Once the Alpine image is available to your account, check its version with:
 docker run --rm ghcr.io/castvane/ffmpeg:ffmpeg9.1-alpine3.23 -version
 ```
 
-The Raspberry Pi build currently passes OpenMAX options on `linux/arm/v7` that FFmpeg 9.1 no longer accepts. The multi-platform image build can fail before publishing either architecture.
+The Raspberry Pi image enables V4L2 M2M on both target platforms and MMAL on `linux/arm/v7`.
 
 ## Build locally
 
