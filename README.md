@@ -52,7 +52,7 @@ The builds include patches for HLS playlist bandwidth estimation and JSON stream
 
 Pushes to `main` trigger the four container publishing workflows. You can also dispatch them from [GitHub Actions](https://github.com/Castvane/ffmpeg/actions). They authenticate to GHCR with the workflow's `GITHUB_TOKEN`. Pulling a private package requires authenticated access to that package.
 
-For optional Docker Hub publishing, add the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` Actions secrets and set the `DOCKERHUB_IMAGE` Actions variable to a lowercase `namespace/repository`. The token needs write access to that repository. When the variable is set, the workflows target both registries with the same tags.
+For optional Docker Hub publishing, add the `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` Actions secrets and set the `PUBLISH_TO_DOCKERHUB` Actions variable to `true`. The token needs write access to `docker.io/castvane/ffmpeg`. The workflows use the same tags in both registries.
 
 ## Licensing
 
