@@ -42,7 +42,7 @@ docker run --rm castvane/ffmpeg:ffmpeg9.1-alpine3.23 -version
 | `cuda13` | Ubuntu 26.04. Set `CUDA_VERSION=13.3.0` when invoking the script to match CI. |
 | `vaapi` | Ubuntu 26.04 for `linux/amd64` |
 
-See the [build script](Build.sh) for image tags and the Dockerfile for each variant for its FFmpeg configuration. The [binary export workflow](.github/workflows/build_base_alpine_static.yaml) is manually dispatched on a self-hosted runner and is configured to export a workflow artifact.
+See the [build script](Build.sh) for image tags and the Dockerfile for each variant for its FFmpeg configuration. The [binary export workflow](.github/workflows/build_base_alpine_static.yaml) is manually dispatched on a GitHub-hosted `ubuntu-latest` runner and is configured to export a workflow artifact.
 
 ## Patches
 
